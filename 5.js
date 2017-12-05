@@ -1067,11 +1067,11 @@ function getStepsTaken(input, offsetAdjust) {
     stepsTaken++;
   }
 
-  return stepsTaken
+  return stepsTaken;
 }
 
 function offsetByOne(number) {
-  return number + 1
+  return ++number;
 }
 
 function specialOffset(number) {
