@@ -12,10 +12,8 @@ function getRedistributedArray(numberArray) {
   let amountToRedistribute = numberArray[i];
   newArray[i] = 0;
   
-  while (amountToRedistribute > 0) {
-    i = i >= newArray.length - 1 ? 0 : ++i;
-    newArray[i]++;
-    amountToRedistribute--;
+  while (amountToRedistribute--) {
+    newArray[++i % newArray.length]++;
   }
 
   return newArray;
