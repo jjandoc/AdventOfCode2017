@@ -999,54 +999,35 @@ hey inc -964 if um == 487
 kt inc 387 if cl > -4046
 cl dec -167 if gi == 1209`;
 
-const compare = {
-  '>': (x, y) => x > y,
-  '<': (x, y) => x < y,
-  '<=': (x, y) => x <= y,
-  '>=': (x, y) => x >= y,
-  '==': (x, y) => x == y,
-  '!=': (x, y) => x != y,
-};
-
-function createRegistry(keys) {
-  return keys.reduce((registry, key) => {
-    registry[key] = 0;
-    return registry;
-  }, {});
-}
-
-function executeLine(registry, line) {
-  const state = Object.assign({}, registry);
-  const [target, dir, offset, , x, op, y] = line.split(' ');
-  if (compare[op](registry[x], y)) {
-    state[target] = dir === 'inc' ?
-        state[target] + parseInt(offset, 10) :
-        state[target] - parseInt(offset, 10);
+const compare = (op) => {
+  const compareFunctions = {
+    '>': (x, y) => x > y,
+    '<': (x, y) => x < y,
+    '<=': (x, y) => x <= y,
+    '>=': (x, y) => x >= y,
+    '==': (x, y) => x == y,
+    '!=': (x, y) => x != y,  
   }
-  return state
-}
-
-function executeInstructions(registry, instructions) {
-  let state = registry;
-  instructions.forEach((line) => {
-    state = executeLine(state, line);
-  });
-  return state;
-}
-
-function getMaxRegisterValue(registry, instructions) {
-  let state = registry;
-  let max = 0;
-  instructions.forEach((line) => {
-    state = executeLine(state, line);
-    max = Math.max(max, ...Object.values(state));
-  });
-  return max;
+  return compareFunctions[op];
 };
 
-const myInstructions = myInput.split('\n');
-const myRegistry =
-    createRegistry(myInstructions.map((line) => line.split(' ')[0]));
-console.log(Math.max(...Object.values(
-    executeInstructions(myRegistry, myInstructions)))); // Part 1
-console.log(getMaxRegisterValue(myRegistry, myInstructions)); // Part 2
+function executeLine(line, state) {
+  const newState = Object.assign({}, state);
+  const [target, dir, offset, , x, op, y] = line.split(' ');
+  if (!newState.hasOwnProperty(target)) newState[target] = 0;
+  if (!newState.hasOwnProperty(x)) newState[x] = 0;
+  if (compare(op)(newState[x], y)) newState[target] = dir === 'inc' ?
+      newState[target] + parseInt(offset, 10) :
+      newState[target] - parseInt(offset, 10);
+  return newState
+}
+
+const states = [{}];
+
+myInput.split('\n').forEach((line) => {
+  states.push(executeLine(line, states[states.length - 1]));
+});
+
+console.log(Math.max(...Object.values(states[states.length - 1]))); // Part 1
+console.log(Math.max(
+    ...[].concat(...states.map((state) => Object.values(state))))); // Part 2
