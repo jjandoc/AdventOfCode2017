@@ -10,25 +10,23 @@ function getPosition(initialPos, direction) {
   let [x, y] = initialPos;
   switch (direction) {
     case 'nw':
-      x--;
-      y++;
+      x++;
       break;
     case 'n':
       y++;
       break;
     case 'ne':
-      x++;
+      x--;
       y++;
       break;
     case 'se':
-      x++
-      y--;
+      x--;
       break;
     case 's':
       y--;
       break;
     case 'sw':
-      x--;
+      x++;
       y--;
       break;
   }
@@ -48,5 +46,5 @@ function getFurthest(input) {
   }));
 }
 
-console.log(getResult(myInput));
-console.log(getFurthest(myInput));
+console.log(getResult(myInput)); // Part 1.
+console.log(getFurthest(myInput)); // Part 2. Doesn't work for whatever reason.
