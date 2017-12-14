@@ -53,7 +53,7 @@ function getCourse(input) {
 
 function getScannerPos(range, time) {
   const maxIndex = range - 1;
-  return maxIndex - Math.abs((time % (maxIndex * 2)) - maxIndex);
+  return maxIndex - Math.abs((Math.abs(time) % (maxIndex * 2)) - maxIndex);
 }
 
 function getMissteps(course, timeDelay = 0) {
