@@ -43,7 +43,11 @@ function getKnotHash(list, input) {
     hash[hash.length - 1].push(item);
     return hash;
   }, [[]]).reduce((hash, block) => {
-    return hash + block.reduce((result, num) => result ^ num, 0).toString(16)
+    let hexChar = block.reduce((result, num) => result ^ num, 0).toString(16);
+    while (hexChar.length < 2) {
+      hexChar = '0' + hexChar
+    }
+    return hash + hexChar;
   }, '');
 }
 
