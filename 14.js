@@ -52,11 +52,48 @@ function getDisk(input) {
         binaryBits = '0' + binaryBits;
       }
       return binaryBits;
-    }).join('').split('').map((d) => +d);
+    }).join('').split('').map((d) => d === '1' ? '#' : '.');
     disk.push(row);
   }
   return disk;
 }
 
+function markRegion(squareCoords, mark, disk) {
+  let markedDisk = disk.slice();
+  const [row, col] = squareCoords;
+  const neighbors = [
+    [row - 1, col], // above
+    [row, col + 1], // right
+    [row + 1, col], // below
+    [row, col - 1], // left
+  ];
+  markedDisk[row][col] = mark;
+  neighbors.forEach((neighborCoords) => {
+    const [neighborRow, neighborCol] = neighborCoords;
+    if (markedDisk[neighborRow] &&
+        markedDisk[neighborRow][neighborCol] === '#') {
+      markedDisk[neighborRow][neighborCol] = mark;
+      markRegion(neighborCoords, mark, markedDisk)
+    }
+  });
+  return markedDisk;
+}
+
+function getRegionCount(disk) {
+  let markedDisk = disk.slice();
+  let regionCount = 0;
+  markedDisk.forEach((row, rowIndex) => {
+    row.forEach((square, colIndex) => {
+      if (square === '#') {
+        regionCount++;
+        markedDisk = markRegion([rowIndex, colIndex], regionCount, markedDisk);
+      }
+    });
+  });
+  return regionCount;
+}
+
 const myDisk = getDisk('nbysizxe');
-console.log([].concat(...myDisk).reduce((total, bit) => bit + total, 0)); // Part 1.
+console.log([].concat(...myDisk).reduce((total, bit) => bit === '#' ? ++total :
+    total, 0)); // Part 1.
+console.log(getRegionCount(myDisk)); // Part 2.
