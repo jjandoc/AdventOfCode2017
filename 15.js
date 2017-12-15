@@ -68,18 +68,19 @@ function judgeValues(values) {
  * @return {number} - The judge's final score.
  */
 function compareGenerators(generators, cycles) {
-  const valueQueue = generators.map((gen) => []);
   let judgeScore = 0;
-  generators.forEach((generator, i) => {
-    while (valueQueue[i].length < cycles) {
+  const queues = generators.map((generator) => {
+    const queue = [];
+    while (queue.length < cycles) {
       const value = generator.generate();
       if (value % generator.pickiness === 0) {
-        valueQueue[i].push(value)
+        queue.push(value)
       }
     }
+    return queue;
   });
   for (let i = 0; i < cycles; i++) {
-    const values = valueQueue.map((queue) => queue[i]);
+    const values = queues.map((queue) => queue[i]);
     if (judgeValues(values)) {
       judgeScore++;
     }
