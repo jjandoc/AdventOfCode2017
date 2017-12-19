@@ -1,14 +1,3 @@
-const sampleInput = `set a 1
-add a 2
-mul a a
-mod a 5
-snd a
-set a 0
-rcv a
-jgz a -1
-set a 1
-jgz a -2`;
-
 const myInput = `set i 31
 set a 1
 mul p 17
@@ -51,8 +40,7 @@ snd a
 jgz f -16
 jgz a -19`;
 
-function getResult(input) {
-  const instructions = input.split('\n').map((line) => line.split(' '));
+function getResult(instructions) {
   let lastFrequency = 0;
   let isSoundRecovered = false;
   let pos = 0;
@@ -97,5 +85,96 @@ function getResult(input) {
   return lastFrequency;
 }
 
-console.log(getResult(sampleInput));
-console.log(getResult(myInput));
+// Start part 2.
+class Program {
+  constructor(state) {
+    this.state = state;
+    this.pos = 0;
+    this.sends = 0;
+    this.queue = [];
+    this.isWaiting = false;
+    this.isFinished = false;
+  }
+}
+
+function getPart2(instructions) {
+  const initialState = instructions.map((command) => command[1])
+      .filter((val, i, arr) => arr.indexOf(val) === i) // unique values only
+      .reduce((state, key) => {
+        if (isNaN(parseInt(key, 10))) {
+          state[key] = 0;
+        }
+        return state;
+      }, {});
+  const programs = [];
+  programs.push(new Program(initialState));
+  programs.push(new Program(Object.assign({}, initialState, {p: 1})));
+  let pos = [0, 0];
+  let active = 0;
+  do {
+    programs.forEach((program, i) => {
+      if (program.queue.length) {
+        program.isWaiting = false;
+      }
+      while (!program.isWaiting && !program.isFinished) {
+        const [cmd, key, y] = instructions[program.pos];
+        const arg = y ? isNaN(parseInt(y, 10)) ? program.state[y] :
+            parseInt(y, 10) : null;
+        switch(cmd) {
+          case 'snd':
+            programs[(i + 1) % 2].queue.push(program.state[key]);
+            program.pos++;
+            program.sends++;
+            break;
+          case 'set':
+            program.state[key] = arg;
+            program.pos++;
+            break;
+          case 'add':
+            program.state[key] += arg;
+            program.pos++;
+            break;
+          case 'mul':
+            program.state[key] *= arg;
+            program.pos++;
+            break;
+          case 'mod':
+            program.state[key] %= arg;
+            program.pos++
+            break;
+          case 'rcv':
+            if (program.queue.length) {
+              program.state[key] = program.queue.shift();
+              program.pos++
+            } else {
+              program.isWaiting = true;
+            }
+            break;
+          case 'jgz':
+            const jumpCheck = parseInt(key, 10);
+            if (isNaN(jumpCheck) && program.state[key] > 0) {
+              program.pos += arg;
+            } else if (jumpCheck > 0) {
+              program.pos += arg;
+            } else {
+              program.pos++;
+            }
+            break;
+        }
+        if (program.pos >= instructions.length || program.pos < 0) {
+          program.isFinished = true;
+        }
+      }
+    });
+  } while ((!programs[0].isFinished && programs[0].queue.length) ||
+      (programs[1].isFinished && programs[1].queue.length));
+  return programs[1].sends;
+}
+
+function parseInput(input) {
+  return input.split('\n').map((line) => line.split(' '));
+}
+
+const myInstuctions = parseInput(myInput);
+console.log(getResult(myInstuctions));
+console.log(getPart2(myInstuctions));
